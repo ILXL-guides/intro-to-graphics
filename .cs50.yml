@@ -1,9 +1,9 @@
 lab50:
   window:
-    -editor
-    -readme
-    -terminal
-    -x
+    - editor
+    - readme
+    - terminal
+    - x
   files:
     - !include main.cc
     - !include cpputils/
