@@ -6,13 +6,6 @@ An overview of graphics using the [C++ Utils](https://github.com/ILXL/cpputils) 
 
 *You can follow this guide from your own machine, or try from [lab.cs50.io](https://lab.cs50.io/ILXL-guides/intro-to-graphics). If you are not using CS50, you will see some markdown for cs50 using curly braces and percentage signs, which you can ignore.*
 
-1. Start by creating a new folder in which we can complete the guide.
-
-  ```
-  mkdir intro-to-graphics
-  cd intro-to-graphics
-  ```
-
 1. We'll need a reference to the ``graphics::Image`` library:
 
   ```
@@ -216,8 +209,7 @@ Now we can draw circles on the ``graphics::Image`` in main.cc.
 
 For example, to draw a red circle with radius 10 centered at x = 25, y = 25:
 
-|![red circle](resources/red_circle.bmp)|
--
+![red circle](resources/red_circle.bmp)
 
 ```cpp
 image.DrawCircle(25, 25, 10, 255, 0, 0);
@@ -225,8 +217,7 @@ image.DrawCircle(25, 25, 10, 255, 0, 0);
 
 To draw a black circle with radius 30 centered at x = 50, y = 60:
 
-|![black circle](resources/black_circle.bmp)|
-|-
+![black circle](resources/black_circle.bmp)
 
 ```cpp
 image.DrawCircle(50, 60, 30, 0, 0, 0);
@@ -254,8 +245,7 @@ You can specify the top left corner of the rectangle with x and y, and then the 
 
 For example, to draw an orange rectangle over the right of the screen:
 
-|![orange rect](resources/orange_rect.bmp)|
--
+![orange rect](resources/orange_rect.bmp)
 
 ```cpp
 const int size = 100;
@@ -282,8 +272,7 @@ bool DrawLine(int x0, int y0, int x1, int y1, int red, int green, int blue);
 
 For example, to draw a purple line diagonally from top right to bottom left:
 
-|![purple line](resources/purple_line.bmp)|
--
+![purple line](resources/purple_line.bmp)
 
 ```cpp
 const int size = 100;
@@ -292,8 +281,7 @@ image.DrawLine(size - 1, 0, 0, size - 1, 171, 132, 232);
 
 Using the ``DrawLine``, ``DrawRect`` and ``DrawCircle`` function you can draw all kinds of images. Here's a tree!
 
-|![fractal tree](resources/example_fractal_tree.png)|
--
+![fractal tree](resources/example_fractal_tree.png)
 
 ### Saving images
 
@@ -313,7 +301,7 @@ In addition to creating new images, ``graphics::Image`` objects can be loaded fr
 
 ```cpp
 graphics::Image image;
-bool success = image.Load("kitten.bmp");
+bool success = image.Load("resources/kitten.bmp");
 std::cout << "Successfully loaded kitten.bmp? " << success << std::endl;
 ```
 
@@ -329,8 +317,7 @@ This unlocks some really cool image manipulation!
 
 **Your turn**: Can you invert the colors in an image programatically?
 
-|![normal photo](resources/kitten.bmp) -> ![inverted photo](resources/inverted.bmp)|
--
+![normal photo](resources/kitten.bmp) -> ![inverted photo](resources/inverted.bmp)
 
 Hint: You'll need to loop through the width and height of the image and manipulate the color at each pixel location. Remember the valid values for each pixel color are between 0 and 255.
 
@@ -342,7 +329,7 @@ Hint: You'll need to loop through the width and height of the image and manipula
 int main() {
   graphics::Image image;
   // Load the file.
-  image.Load("kitten.bmp");
+  image.Load("resources/kitten.bmp");
   // Iterate through all the pixels using for loops.
   for (int i = 0; i < image.GetWidth(); i++) {
     for (int j = 0; j < image.GetHeight(); j++) {
