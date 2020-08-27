@@ -4,7 +4,7 @@ An overview of graphics using the [C++ Utils](https://github.com/ILXL/cpputils) 
 
 ## Setup
 
-*You can follow this guide from your own machine, or try from [lab.cs50.io](https://lab.cs50.io/ILXL-guides/intro-to-graphics). If you are not using CS50, you will see some {% %}, which you can ignore.*
+*You can follow this guide from your own machine, or try from [lab.cs50.io](https://lab.cs50.io/ILXL-guides/intro-to-graphics). If you are not using CS50, you will see some markdown for cs50 using curly braces and percentage signs, which you can ignore.*
 
 1. Start by creating a new folder in which we can complete the guide.
 
