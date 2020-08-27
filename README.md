@@ -4,7 +4,7 @@ An overview of graphics using the [C++ Utils](https://github.com/ILXL/cpputils) 
 
 ## Setup
 
-*Note: if you are using CS50, make sure to start a session with an "X" window.*
+*You can follow this guide from your own machine, or try from [lab.cs50.io](https://lab.cs50.io/ILXL-guides/intro-to-graphics). If you are not using CS50, you will see some {% %}, which you can ignore.*
 
 1. Start by creating a new folder in which we can complete the guide.
 
@@ -25,9 +25,7 @@ An overview of graphics using the [C++ Utils](https://github.com/ILXL/cpputils) 
 
 1. Now you are ready to start creating graphics in C++!
 
-
-<details>
-<summary>Example main.cc</summary>
+{% spoiler Example %}
 
 ```cpp
 #include "cpputils/graphics/image.h"
@@ -37,7 +35,9 @@ int main() {
 }
 ```
 
-</details>
+{% endspoiler %}
+
+{% next %}
 
 ## What is a pixel?
 
@@ -79,6 +79,8 @@ Unlike the Cartesian coordinate system used in math classes, an image coordinate
 
 In the image above, the top left pixel is (0, 0) while the bottom right pixel is (6, 6).
 
+{% next %}
+
 ## ``graphics::Image`` class
 
 You can get the ``graphics::Image`` class for drawing and displaying images when you ``#include "cpputils/graphics/image.h"``.
@@ -101,8 +103,7 @@ image.ShowUntilClosed();
 
 **Your turn**: Open ``main.cc`` and create an image that's 200x150 pixels, then show it. Make sure you've initialized cpputils using the ``git clone`` command from the [Setup](#setup) step (check: when you type ``ls`` you should see that cpputils/ directory exists).
 
-<details>
-<summary>Example</summary>
+{% spoiler Example %}
 
 ```cpp
 #include "cpputils/graphics/image.h"
@@ -117,7 +118,7 @@ int main() {
 }
 ```
 
-</details>
+{% endspoiler %}
 
 Now we can compile and run main.cc. There's a few extra arguments we need for ``clang++`` to properly build a graphical module. Try running the ``clang++`` command below and then executing ``main``, you should get a blank image to show up!
 
@@ -125,6 +126,8 @@ Now we can compile and run main.cc. There's a few extra arguments we need for ``
 clang++ -std=c++17 main.cc cpputils/graphics/image.cc -o main -lm -lX11 -lpthread
 ./main
 ```
+
+{% next %}
 
 ### Interacting with pixels
 
@@ -190,6 +193,8 @@ std::cout << "The red channel is " << value << std::endl;
 
 **Your turn**: Try drawing some colored pixels on your image, and then display the image. Can you see the recolored pixels on your screen? That's how big a pixel is!
 
+{% next %}
+
 ### Drawing shapes
 
 You can draw circles, rectangles and lines on a ``graphics::Image``.
@@ -209,19 +214,27 @@ bool DrawCircle(int x, int y, int radius, int red, int green, int blue);
 
 Now we can draw circles on the ``graphics::Image`` in main.cc.
 
-For example, to draw a red circle with radius 10 centered at x = 25, y = 25: ![red circle](resources/red_circle.bmp)
+For example, to draw a red circle with radius 10 centered at x = 25, y = 25:
+
+|![red circle](resources/red_circle.bmp)|
+-
 
 ```cpp
 image.DrawCircle(25, 25, 10, 255, 0, 0);
 ```
 
-To draw a black circle with radius 30 centered at x = 50, y = 60: ![black circle](resources/black_circle.bmp)
+To draw a black circle with radius 30 centered at x = 50, y = 60:
+
+|![black circle](resources/black_circle.bmp)|
+|-
 
 ```cpp
 image.DrawCircle(50, 60, 30, 0, 0, 0);
 ```
 
 **Your turn**: Try drawing a bunch of circles of different colors on your image. Can you make a giant teal circle? What about a small pink circle? Can you make something that looks like this emoji? 😮 How about the Japanese flag?
+
+{% next %}
 
 #### Rectangles
 
@@ -239,7 +252,10 @@ bool DrawRectangle(int x, int y, int width, int height, int red, int green,
 
 You can specify the top left corner of the rectangle with x and y, and then the width and height.
 
-For example, to draw an orange rectangle over the right of the screen: ![orange rect](resources/orange_rect.bmp)
+For example, to draw an orange rectangle over the right of the screen:
+
+|![orange rect](resources/orange_rect.bmp)|
+-
 
 ```cpp
 const int size = 100;
@@ -249,6 +265,8 @@ image.DrawRectangle(size / 2, 0, size / 2 - 1, size, 255, 127, 0);
 Note that you cannot draw rectangles or circles outside the image bounds, or a error message is printed.
 
 **Your turn**: Try updating main.cc to draw some rectangles -- some tall, thin ones, some short, wide ones, and any others you'd like! Can you draw the [Italian](https://en.wikipedia.org/wiki/Flag_of_Italy) flag? The [Colombian](https://en.wikipedia.org/wiki/Flag_of_Colombia) flag?
+
+{% next %}
 
 #### Lines
 
@@ -262,7 +280,10 @@ Drawing lines is similar to rectangles: You specify the (x, y) coordinates of th
 bool DrawLine(int x0, int y0, int x1, int y1, int red, int green, int blue);
 ```
 
-For example, to draw a purple line diagonally from top right to bottom left: ![purple line](resources/purple_line.bmp)
+For example, to draw a purple line diagonally from top right to bottom left:
+
+|![purple line](resources/purple_line.bmp)|
+-
 
 ```cpp
 const int size = 100;
@@ -271,7 +292,8 @@ image.DrawLine(size - 1, 0, 0, size - 1, 171, 132, 232);
 
 Using the ``DrawLine``, ``DrawRect`` and ``DrawCircle`` function you can draw all kinds of images. Here's a tree!
 
-![fractal tree](resources/example_fractal_tree.png)
+|![fractal tree](resources/example_fractal_tree.png)|
+-
 
 ### Saving images
 
@@ -282,6 +304,8 @@ image.SaveImageBmp("my_image.bmp");
 ```
 
 *Note: If you are on CS50 you can right-click on the image in the file explorer to save it to your computer.*
+
+{% next %}
 
 ### Loading images
 
@@ -305,12 +329,12 @@ This unlocks some really cool image manipulation!
 
 **Your turn**: Can you invert the colors in an image programatically?
 
-![normal photo](resources/kitten.bmp) -> ![inverted photo](resources/inverted.bmp)
+|![normal photo](resources/kitten.bmp) -> ![inverted photo](resources/inverted.bmp)|
+-
 
 Hint: You'll need to loop through the width and height of the image and manipulate the color at each pixel location. Remember the valid values for each pixel color are between 0 and 255.
 
-<details>
-<summary>Example</summary>
+{% spoiler Example %}
 
 ```cpp
 #include "cpputils/graphics/image.h"
@@ -337,9 +361,11 @@ int main() {
 }
 ```
 
-</details>
+{% endspoiler %}
 
 **Your turn**: Try other pixel manipulations, like swapping red, green and blue, or setting one channel to 0 or 255. What's the funniest image you can create?
+
+{% next %}
 
 ## Advanced topics
 
