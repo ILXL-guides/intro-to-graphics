@@ -12,11 +12,11 @@ An overview of graphics using the [C++ Utils](https://github.com/ILXL/cpputils) 
   git clone https://github.com/ILXL/cpputils.git
   ```
 
-1. We can now ``#include "cpputils/graphics/image.h"`` to use the classes ``graphics::Image`` and ``graphics::Color``.
+2. We can now ``#include "cpputils/graphics/image.h"`` to use the classes ``graphics::Image`` and ``graphics::Color``.
 
  Create main.cc with a basic ``main()`` function and include image.h.
 
-1. Now you are ready to start creating graphics in C++!
+3. Now you are ready to start creating graphics in C++!
 
 {% spoiler Example %}
 
@@ -34,7 +34,7 @@ int main() {
 
 ## What is a pixel?
 
-A pixel is a set of three tiny lights on a display: red, green and blue. Below you can see a zoomed in screenshot of an LCD display showing a pixel grid.
+A pixel is a set of three tiny lights on a display: red, green and blue. Below you can see a zoomed in photograph of an LCD display showing a pixel grid.
 
 ![Macro photograph of text "RGB" in LCD display](https://upload.wikimedia.org/wikipedia/commons/7/70/LCD_RGB.jpg)
 *https://commons.wikimedia.org/wiki/File:LCD_RGB.jpg*
@@ -43,14 +43,14 @@ Images are made from two-dimensional grids of pixels. Pixels are so small that o
 
 ### Color
 
-To specify a color, you can specify the brightness of the red, green and blue components of each pixel. Brightnesses may range between 0 and 255. (255 is 2^8 - 1).
+To specify a color, you can specify the brightness of the red, green and blue components of each pixel. Brightnesses may range between 0 and 255 (256 options, 256 is 2^8).
 
 By convention, we list red, then green, then blue.
 
 Here are some examples:
 
 <div style="padding: 6px; background-color: black; color: white">Red: 0, Green: 0, Blue: 0</div><br/>
-<div style="padding: 6px; background-color: white; color: black">Red: 255, Green: 255, Blue: 255</div><br/>
+<div style="padding: 6px; background-color: white; color: black; outline: 1px solid black">Red: 255, Green: 255, Blue: 255</div><br/>
 <div style="padding: 6px; background-color:rgb(255,0,0); color: white">Red: 255, Green: 0, Blue: 0</div><br/>
 <div style="padding: 6px; background-color:rgb(0,255,0); color: black">Red: 0, Green: 255, Blue: 0</div><br/>
 <div style="padding: 6px; background-color:rgb(0,0,255); color: white">Red: 0, Green: 0, Blue: 255</div><br/>
@@ -223,7 +223,7 @@ To draw a black circle with radius 30 centered at x = 50, y = 60:
 image.DrawCircle(50, 60, 30, 0, 0, 0);
 ```
 
-**Your turn**: Try drawing a bunch of circles of different colors on your image. Can you make a giant teal circle? What about a small pink circle? Can you make something that looks like this emoji? 😮 How about the Japanese flag?
+**Your turn**: Try drawing a bunch of circles of different colors on your image. Can you make a giant teal circle? What about a small pink circle? Can you make something that looks like this emoji? 😮 How about the [Japanese flag](https://en.wikipedia.org/wiki/Flag_of_Japan)?
 
 {% next %}
 
@@ -291,7 +291,7 @@ If you like your image art, go ahead and save it! You can save to a bitmap file 
 image.SaveImageBmp("my_image.bmp");
 ```
 
-*Note: If you are on CS50 you can right-click on the image in the file explorer to save it to your computer.*
+*Note: If you are on CS50 you can use the file's menu in the filetree to save it to your computer.*
 
 {% next %}
 
@@ -302,6 +302,7 @@ In addition to creating new images, ``graphics::Image`` objects can be loaded fr
 ```cpp
 graphics::Image image;
 bool success = image.Load("resources/kitten.bmp");
+// You'll need to #import <iostream> to cout.
 std::cout << "Successfully loaded kitten.bmp? " << success << std::endl;
 ```
 
