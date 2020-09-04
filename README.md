@@ -1,6 +1,6 @@
-# Introduction to Graphics
+# Introduction to Digital Images
 
-An overview of graphics using the [C++ Utils](https://github.com/ILXL/cpputils) ``graphics`` classes.
+An overview of digital images using the [C++ Utils](https://github.com/ILXL/cpputils) ``graphics`` classes.
 
 ## Setup
 
@@ -16,7 +16,7 @@ An overview of graphics using the [C++ Utils](https://github.com/ILXL/cpputils) 
 
  Create main.cc with a basic ``main()`` function and include image.h.
 
-3. Now you are ready to start creating graphics in C++!
+3. Now you are ready to start creating images in C++!
 
 {% spoiler Example %}
 
