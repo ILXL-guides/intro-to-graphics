@@ -120,6 +120,11 @@ clang++ -std=c++17 main.cc cpputils/graphics/image.cc -o main -lm -lX11 -lpthrea
 ./main
 ```
 
+*Note: If you are running this on a Mac you will need to add some compile commands instead of ``-lm -lX11 -lpthread``*
+```
+-lm -I/opt/X11/include -lpthread -lX11 -lstdc++ -I/usr/X11R6/include -L/usr/X11R6/lib
+```
+
 {% next %}
 
 ### Interacting with pixels
@@ -409,6 +414,184 @@ image.SetColor(30, 30, red);
 graphics::Color pixel = image.GetColor(42, 49);
 ```
 
-### Mouse events and updating the displayed image
+{% next %}
 
-Coming soon!
+### Animation
+
+Images can be animated after display by using the ``graphics::AnimationEventListener`` class, adding this class as an AnimationEventListener on a ``graphics::Image``, and providing an implementation for the virtual ``void OnAnimationStep`` function. This function will be called every 30 ms by default, or as frequently as specified in an optional parameter to ``Image::ShowUntilClosed``:
+
+```cpp
+// Shows image in a window titled "My animation window", with an animation duration of 60 ms.
+image.ShowUntilClosed("My animation window", 60);
+```
+
+If you are showing an animation, all the logic to update the animation should begin from the ``OnAnimationStep`` function. At the end of ``OnAnimationStep`` you should call ``Image::Flush()`` to ensure the drawing is updated.
+
+For example, let's create an animation of a ball bouncing around like a screensaver. We could make an ``RedBallAnimator`` class which inherits from ``graphics::AnimationEventListener``. ``RedBallAnimator`` should have a private member variables for:
+* a ``graphics::Image`` to draw on,
+* integers ``x_`` and ``y_`` to track the position of the ball,
+* integers ``dx_`` and ``dy_`` to track the change in ``x_`` and ``y_`` with each step.
+
+We need to create three methods for this class:
+* a ``Start()`` function which will create and show the image as well as add itself (the ``RedBallAnimator``) as a listener.
+* a destructor, ``~RedBallAnimator``, which removes itself as an AnimationEventListener from the image, and
+* ``OnAnimationStep``, overridden from superclass ``graphics::AnimationEventListener``, which will perform the drawing and logic.
+
+Finally, the ``main`` function will simply create the ``RedBallAnimator``, ask it to ``Start()``, and then ``return 0``.
+
+The entirety of the logic for drawing the ball goes into ``OnAnimationStep``. In this case, we can update the ``x_`` and ``y_`` member variables of ``RedBallAnimator`` by adding a fixed delta. When an edge is reached, the delta is simply subtracted instead of added.
+
+Below is a short program that runs this animation. Can you change this code so that you have two balls bouncing simultaneously (perhaps by adding another set of x_ and y_)? What about creating something which grows larger and smaller in radius instead of moving its location?
+
+{% spoiler Example %}
+```cpp
+#include "cpputils/graphics/image.h"
+#include "cpputils/graphics/image_event.h"
+
+class RedBallAnimator : public graphics::AnimationEventListener {
+ public:
+  ~RedBallAnimator() {
+    image_.RemoveAnimationEventListener(*this);
+  }
+
+  // Initialize and shows the image, as well as adds itself as an
+  // AnimationEventListener.
+  void Start() {
+    image_.Initialize(250, 250);
+    image_.AddAnimationEventListener(*this);
+
+    // Milliseconds between animation frames.
+    int animation_duration = 60;
+    image_.ShowUntilClosed("Animation", animation_duration);
+  }
+
+  // Overridden from graphics::AnimationEventListener, this method contains
+  // all of the logic to animate the image after it is displayed.
+  void OnAnimationStep() override {
+    // Draw a white circle to erase the previous red dot.
+    image_.DrawCircle(x_, y_, 10, 255, 255, 255);
+
+    // Check if we've hit an edge and need to bounce.
+    if (x_ + dx_ >= 250 || x_ + dx_ < 0) {
+      dx_ = -1 * dx_;
+    }
+    if (y_ + dy_ >= 250 || y_ + dy_ < 0) {
+      dy_ = -1 * dy_;
+    }
+
+    // Update the position based on dy_ and dx_.
+    x_ += dx_;
+    y_ += dy_;
+
+    // Draw a red circle in the new location.
+    image_.DrawCircle(x_, y_, 10, 255, 0, 0);
+
+    // Tell the image to redraw.
+    image_.Flush();
+  }
+
+ private:
+  graphics::Image image_;
+  int x_ = 49;
+  int y_ = 199;
+  int dx_ = 5;
+  int dy_ = 10;
+};
+
+int main() {
+  RedBallAnimator bouncy;
+  bouncy.Start();
+  return 0;
+}
+```
+
+Give it a try! You can save this code into ``animation.cc``, and build and execute with:
+
+```
+clang++ animation.cc cpputils/graphics/image.cc -o animation -lm -lX11 -lpthread && ./animation
+```
+{% endspoiler %}
+
+### Handling Mouse Events
+Like animations, you can implement an abstract ``graphics`` interface to listen to mouse events. Images can send mouse events after display by using the ``graphics::MouseEventListener`` class, adding this class as an MouseEventListener on a ``graphics::Image``, and providing an implementation for the virtual ``void OnMouseEvent(const MouseEvent& event)`` function. This function will be called every time a mouse action is detected.
+
+You can get the X and Y coordinates from the MouseEvent using  as well as the MouseAction:
+
+```cpp
+int x = event.GetX();
+int y = event.GetY();
+graphics::MouseAction action = event.GetMouseAction();
+```
+
+Here's the definition of a ``MouseAction``:
+```cpp
+/**
+ * Enum representing whether a button was pressed or released.
+ */
+enum class MouseAction {
+  // Left button down.
+  kPressed = 0,
+  // Moved while left button was down.
+  kDragged,
+  // Left button up.
+  kReleased,
+  // Moved but the left button was not down.
+  kMoved,
+};
+```
+
+Below is an example of drawing random colored circles whenever the mouse is clicked. Can you extend this to draw lines when the mouse is dragged too? What about creating a simple brush tool where it draws thick lines between each deteced mouse point?
+
+{% spoiler Example %}
+```cpp
+#include <random>
+
+#include "cpputils/graphics/image.h"
+#include "cpputils/graphics/image_event.h"
+
+class TouchDotCreator : public graphics::MouseEventListener {
+ public:
+  ~TouchDotCreator() {
+    image_.RemoveMouseEventListener(*this);
+  }
+
+  // Initialize and shows the image, as well as adds itself as an
+  // MouseEventListener.
+  void Start() {
+    image_.Initialize(250, 250);
+    image_.AddMouseEventListener(*this);
+    image_.ShowUntilClosed();
+  }
+
+  // Overridden from graphics::MouseEventListener, this method contains all of
+  // the logic to update the drawing whenever a mouse event happens.
+  void OnMouseEvent(const graphics::MouseEvent& event) override {
+    if (event.GetMouseAction() == graphics::MouseAction::kPressed) {
+      // Draw a circle of random color wherever the mouse is clicked.
+      int red = rand() % 256;
+      int green = rand() % 256;
+      int blue = rand() % 256;
+      image_.DrawCircle(event.GetX(), event.GetY(), 10, red, green, blue);
+    }
+    // Tell the image to redraw.
+    image_.Flush();
+  }
+
+ private:
+  graphics::Image image_;
+};
+
+int main() {
+  TouchDotCreator touch_dots;
+  touch_dots.Start();
+  return 0;
+}
+```
+
+
+Give it a try! You can save this code into ``mouse.cc``, and build and execute with:
+
+```
+clang++ mouse.cc cpputils/graphics/image.cc -o mouse -lm -lX11 -lpthread && ./mouse
+```
+{% endspoiler %}
