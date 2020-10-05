@@ -512,6 +512,8 @@ clang++ animation.cc cpputils/graphics/image.cc -o animation -lm -lX11 -lpthread
 ```
 {% endspoiler %}
 
+{% next %}
+
 ### Handling Mouse Events
 Like animations, you can implement an abstract ``graphics`` interface to listen to mouse events. Images can send mouse events after display by using the ``graphics::MouseEventListener`` class, adding this class as an MouseEventListener on a ``graphics::Image``, and providing an implementation for the virtual ``void OnMouseEvent(const MouseEvent& event)`` function. This function will be called every time a mouse action is detected.
 
@@ -587,7 +589,6 @@ int main() {
   return 0;
 }
 ```
-
 
 Give it a try! You can save this code into ``mouse.cc``, and build and execute with:
 
