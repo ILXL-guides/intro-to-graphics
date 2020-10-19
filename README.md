@@ -557,6 +557,8 @@ clang++ mouse.cc cpputils/graphics/image.cc -o mouse -lm -lX11 -lpthread && ./mo
 ```
 {% endspoiler %}
 
+{% next %}
+
 ### Animation after display
 
 Instead of simple animation, which basically halts the program while the image is being shown, it can sometimes make more sense to have code which updates the image every time a fixed interval elapses.
