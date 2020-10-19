@@ -416,7 +416,150 @@ graphics::Color pixel = image.GetColor(42, 49);
 
 {% next %}
 
-### Animation
+### Simple Animation
+
+Instead of using ``Image::ShowUntilClosed``, use the ``Image::ShowForMs`` function to show a ``graphics::Image`` for a fixed duration (in milliseconds). For example, the following code snippet shows an image for 10 milliseconds in a window titled "Animation". Note that the program will halt for the specified duration while the image is being displayed.
+
+```cpp
+image.ShowForMs(10, "Animation");
+```
+
+For example, can you create a linear progress bar by drawing rectangles of increasing size and then updating the display?
+
+{% spoiler Example %}
+
+```cpp
+#include "cpputils/graphics/image.h"
+
+int main() {
+  const int kWidth = 280;
+  const int kSteps = 100;
+  const int kMsPerStep = 60;
+
+  graphics::Image image(kWidth + 20, 100);
+
+  // Draw the progres bar background.
+  image.DrawRectangle(10, 40, kWidth, 20, graphics::Color(175, 175, 175));
+
+  for (int i = 0; i <= kSteps; i++) {
+    // Draw the progress bar contents based on i.
+    image.DrawRectangle(10, 40, kWidth * 1.0 / kSteps * i, 20, graphics::Color(25, 50, 255));
+
+    // Display for a few ms before going through the loop again.
+    image.ShowForMs(kMsPerStep, "Progress");
+  }
+
+  // Keep the image up until the user is done.
+  image.ShowUntilClosed("Complete");
+  return 0;
+}
+
+```
+
+{% endspoiler %}
+
+{% next %}
+
+### Handling Mouse Events
+Like animations, you can implement an abstract ``graphics`` interface to listen to mouse events. Images can send mouse events after display by using the ``graphics::MouseEventListener`` class, adding this class as an MouseEventListener on a ``graphics::Image``, and providing an implementation for the virtual ``void OnMouseEvent(const MouseEvent& event)`` function. This function will be called every time a mouse action is detected.
+
+You can get the X and Y coordinates from the MouseEvent using  as well as the MouseAction:
+
+```cpp
+int x = event.GetX();
+int y = event.GetY();
+graphics::MouseAction action = event.GetMouseAction();
+```
+
+Here's the definition of a ``MouseAction``:
+```cpp
+/**
+ * Enum representing whether a button was pressed or released.
+ */
+enum class MouseAction {
+  // Left button down.
+  kPressed = 0,
+  // Moved while left button was down.
+  kDragged,
+  // Left button up.
+  kReleased,
+  // Moved but the left button was not down.
+  kMoved,
+};
+```
+
+For example, when the user presses the mouse button down at the coordinate (10, 10), we would get a ``graphics::MouseEvent event`` with ``event.GetX() == 10``, ``event.GetY() == 10``, and ``event.GetMouseAction() == graphics::MouseAction::kPressed``.
+
+You need to add your class as a listener on the image in order to start receiving events, and remove it as a listener when you are done receiving events (don't worry about the ``*this`` syntax if you don't know what that means, just copy-paste this into your class):
+
+```cpp
+image_.AddMouseEventListener(*this);
+```
+
+Then in the destructor you should remove your class from the image to clean up. Copy-paste the following into the destructor:
+
+```cpp
+image_.RemoveMouseEventListener(*this);
+```
+
+Below is an example of drawing random colored circles whenever the mouse is clicked. Can you extend this to draw lines when the mouse is dragged too? What about creating a simple brush tool where it draws thick lines between each deteced mouse point?
+
+{% spoiler Example %}
+```cpp
+#include <random>
+
+#include "cpputils/graphics/image.h"
+#include "cpputils/graphics/image_event.h"
+
+class TouchDotCreator : public graphics::MouseEventListener {
+ public:
+  ~TouchDotCreator() {
+    image_.RemoveMouseEventListener(*this);
+  }
+
+  // Initialize and shows the image, as well as adds itself as an
+  // MouseEventListener.
+  void Start() {
+    image_.Initialize(250, 250);
+    image_.AddMouseEventListener(*this);
+    image_.ShowUntilClosed();
+  }
+
+  // Overridden from graphics::MouseEventListener, this method contains all of
+  // the logic to update the drawing whenever a mouse event happens.
+  void OnMouseEvent(const graphics::MouseEvent& event) override {
+    if (event.GetMouseAction() == graphics::MouseAction::kPressed) {
+      // Draw a circle of random color wherever the mouse is clicked.
+      int red = rand() % 256;
+      int green = rand() % 256;
+      int blue = rand() % 256;
+      image_.DrawCircle(event.GetX(), event.GetY(), 10, red, green, blue);
+    }
+    // Tell the image to redraw.
+    image_.Flush();
+  }
+
+ private:
+  graphics::Image image_;
+};
+
+int main() {
+  TouchDotCreator touch_dots;
+  touch_dots.Start();
+  return 0;
+}
+```
+
+Give it a try! You can save this code into ``mouse.cc``, and build and execute with:
+
+```
+clang++ mouse.cc cpputils/graphics/image.cc -o mouse -lm -lX11 -lpthread && ./mouse
+```
+{% endspoiler %}
+
+### Animation after display
+
+Instead of simple animation, which basically halts the program while the image is being shown, it can sometimes make more sense to have code which updates the image every time a fixed interval elapses.
 
 Images can be animated after display by using the ``graphics::AnimationEventListener`` class, adding this class as an AnimationEventListener on a ``graphics::Image``, and providing an implementation for the virtual ``void OnAnimationStep`` function. This function will be called every 30 ms by default, or as frequently as specified in an optional parameter to ``Image::ShowUntilClosed``:
 
@@ -425,7 +568,19 @@ Images can be animated after display by using the ``graphics::AnimationEventList
 image.ShowUntilClosed("My animation window", 60);
 ```
 
-If you are showing an animation, all the logic to update the animation should begin from the ``OnAnimationStep`` function. At the end of ``OnAnimationStep`` you should call ``Image::Flush()`` to ensure the drawing is updated.
+Thus if you are showing an animation, all the logic to update the animation should begin from the ``OnAnimationStep`` function, which is the only function in the AnimationEventListener interface. At the end of ``OnAnimationStep`` you should call ``Image::Flush()`` to ensure the drawing is updated.
+
+You need to add your class as a listener on the image in order to start receiving events, and remove it as a listener when you are done receiving events (don't worry about the ``*this`` syntax if you don't know what that means, just copy-paste this into your class):
+
+```cpp
+image_.AddAnimationEventListener(*this);
+```
+
+Then in the destructor you should remove your class from the image to clean up. Copy-paste the following into the destructor:
+
+```cpp
+image_.RemoveAnimationEventListener(*this);
+```
 
 For example, let's create an animation of a ball bouncing around like a screensaver. We could make an ``RedBallAnimator`` class which inherits from ``graphics::AnimationEventListener``. ``RedBallAnimator`` should have a private member variables for:
 * a ``graphics::Image`` to draw on,
@@ -512,87 +667,7 @@ clang++ animation.cc cpputils/graphics/image.cc -o animation -lm -lX11 -lpthread
 ```
 {% endspoiler %}
 
-{% next %}
 
-### Handling Mouse Events
-Like animations, you can implement an abstract ``graphics`` interface to listen to mouse events. Images can send mouse events after display by using the ``graphics::MouseEventListener`` class, adding this class as an MouseEventListener on a ``graphics::Image``, and providing an implementation for the virtual ``void OnMouseEvent(const MouseEvent& event)`` function. This function will be called every time a mouse action is detected.
+### Animation and Mouse Events in a single program
 
-You can get the X and Y coordinates from the MouseEvent using  as well as the MouseAction:
-
-```cpp
-int x = event.GetX();
-int y = event.GetY();
-graphics::MouseAction action = event.GetMouseAction();
-```
-
-Here's the definition of a ``MouseAction``:
-```cpp
-/**
- * Enum representing whether a button was pressed or released.
- */
-enum class MouseAction {
-  // Left button down.
-  kPressed = 0,
-  // Moved while left button was down.
-  kDragged,
-  // Left button up.
-  kReleased,
-  // Moved but the left button was not down.
-  kMoved,
-};
-```
-
-Below is an example of drawing random colored circles whenever the mouse is clicked. Can you extend this to draw lines when the mouse is dragged too? What about creating a simple brush tool where it draws thick lines between each deteced mouse point?
-
-{% spoiler Example %}
-```cpp
-#include <random>
-
-#include "cpputils/graphics/image.h"
-#include "cpputils/graphics/image_event.h"
-
-class TouchDotCreator : public graphics::MouseEventListener {
- public:
-  ~TouchDotCreator() {
-    image_.RemoveMouseEventListener(*this);
-  }
-
-  // Initialize and shows the image, as well as adds itself as an
-  // MouseEventListener.
-  void Start() {
-    image_.Initialize(250, 250);
-    image_.AddMouseEventListener(*this);
-    image_.ShowUntilClosed();
-  }
-
-  // Overridden from graphics::MouseEventListener, this method contains all of
-  // the logic to update the drawing whenever a mouse event happens.
-  void OnMouseEvent(const graphics::MouseEvent& event) override {
-    if (event.GetMouseAction() == graphics::MouseAction::kPressed) {
-      // Draw a circle of random color wherever the mouse is clicked.
-      int red = rand() % 256;
-      int green = rand() % 256;
-      int blue = rand() % 256;
-      image_.DrawCircle(event.GetX(), event.GetY(), 10, red, green, blue);
-    }
-    // Tell the image to redraw.
-    image_.Flush();
-  }
-
- private:
-  graphics::Image image_;
-};
-
-int main() {
-  TouchDotCreator touch_dots;
-  touch_dots.Start();
-  return 0;
-}
-```
-
-Give it a try! You can save this code into ``mouse.cc``, and build and execute with:
-
-```
-clang++ mouse.cc cpputils/graphics/image.cc -o mouse -lm -lX11 -lpthread && ./mouse
-```
-{% endspoiler %}
+If you want to receive mouse events and do animation, for example to create a game, you can create a class that inherits from both ``graphics::AnimationEventListener`` and ``graphics::MouseEventListener``. Register the class as a listener of on the image for both mouse and animation events, then use ``Image::ShowUntilClosed``. The ``OnMouseEvent`` callback will occur any time there is a mouse event, while the ``OnAnimationStep`` will occur regularly.
